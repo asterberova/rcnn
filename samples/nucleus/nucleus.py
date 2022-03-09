@@ -54,15 +54,19 @@ from mrcnn import model as modellib
 from mrcnn import visualize
 
 # Path to trained weights file
-COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+DSLAB_DATA = '/data/s2732815/rcnn/'
+# COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+COCO_WEIGHTS_PATH = os.path.join(DSLAB_DATA, "mask_rcnn_coco.h5")
 
 # Directory to save logs and model checkpoints, if not provided
 # through the command line argument --logs
-DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
+# DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
+DEFAULT_LOGS_DIR = os.path.join(DSLAB_DATA, "logs")
 
 # Results directory
 # Save submission files here
-RESULTS_DIR = os.path.join(ROOT_DIR, "results/nucleus/")
+# RESULTS_DIR = os.path.join(ROOT_DIR, "results/nucleus/")
+RESULTS_DIR = os.path.join(DSLAB_DATA, "results/nucleus/")
 
 # The dataset doesn't have a standard train/val split, so I picked
 # a variety of images to surve as a validation set.

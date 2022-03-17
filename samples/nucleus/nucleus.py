@@ -284,17 +284,17 @@ def train(model, dataset_dir, subset):
 
     # If starting from imagenet, train heads only for a bit
     # since they have random weights
-    print("Train network heads")
-    model.train(dataset_train, dataset_val,
-                learning_rate=config.LEARNING_RATE,
-                epochs=20,
-                augmentation=augmentation,
-                layers='heads')
+    # print("Train network heads")
+    # model.train(dataset_train, dataset_val,
+    #             learning_rate=config.LEARNING_RATE,
+    #             epochs=20,
+    #             augmentation=augmentation,
+    #             layers='heads')
 
     print("Train all layers")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=40,
+                epochs=50,
                 augmentation=augmentation,
                 layers='all')
 

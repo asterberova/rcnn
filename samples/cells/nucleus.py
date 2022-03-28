@@ -70,8 +70,6 @@ RESULTS_DIR = os.path.join(DSLAB_DATA, "results/cells/")
 
 # The dataset doesn't have a standard train/val split, so I picked
 # a variety of images to surve as a validation set.
-VAL_IMAGE_IDS = []
-
 
 ############################################################
 #  Configurations
@@ -89,7 +87,7 @@ class CellsConfig(Config):
     NUM_CLASSES = 1 + 1  # Background + cells
 
     # Number of training and validation steps per epoch
-    STEPS_PER_EPOCH = 650 // IMAGES_PER_GPU
+    STEPS_PER_EPOCH = 628 // IMAGES_PER_GPU
     VALIDATION_STEPS = max(1, 20 // IMAGES_PER_GPU)
 
     # Don't exclude based on confidence. Since we have two classes
@@ -177,7 +175,7 @@ class CellsDataset(utils.Dataset):
         # "val": use hard-coded list above
         # "train", "val", "test": use data from stage1_train minus the hard-coded list above
         # else: use the data from the specified sub-directory
-        assert subset in ["train", "val", "test"]
+        # assert subset in ["train", "val", "test"]
         subset_dir = subset
         dataset_dir = os.path.join(dataset_dir, subset_dir)
 

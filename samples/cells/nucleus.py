@@ -41,6 +41,7 @@ import json
 import datetime
 import numpy as np
 import skimage.io
+import cv2
 from imgaug import augmenters as iaa
 
 # Root directory of the project
@@ -150,6 +151,18 @@ class CellsInferenceConfig(CellsConfig):
     # Non-max suppression threshold to filter RPN proposals.
     # You can increase this during training to generate more propsals.
     RPN_NMS_THRESHOLD = 0.7
+
+
+def get_ax(rows=1, cols=1, size=16):
+    """Return a Matplotlib Axes array to be used in
+    all visualizations in the notebook. Provide a
+    central point to control graph sizes.
+
+    Adjust the size attribute to control how big to render images
+    """
+    fig, ax = plt.subplots(rows, cols, figsize=(size * cols, size * rows))
+    fig.tight_layout()
+    return ax
 
 
 ############################################################
@@ -350,7 +363,13 @@ def detect(model, dataset_dir, subset):
     dataset.prepare()
     # Load over images
     submission = []
+    APs = list()
+    precisions_dict = {}
+    recall_dict = {}
     for image_id in dataset.image_ids:
+        # load image, bounding boxes and masks for the image id
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id,
+                                                                                  use_mini_mask=False)
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects
@@ -359,13 +378,45 @@ def detect(model, dataset_dir, subset):
         source_id = dataset.image_info[image_id]["id"]
         rle = mask_to_rle(source_id, r["masks"], r["scores"])
         submission.append(rle)
+
+        save_data = os.path.join(submit_dir, dataset.image_info[image_id]["id"])
+        if not os.path.exists(save_data):
+            os.makedirs(save_data)
+        save_data = os.path.join(submit_dir, dataset.image_info[image_id]["id"], 'masks')
+        if not os.path.exists(save_data):
+            os.makedirs(save_data)
         # Save image with masks
         visualize.display_instances(
             image, r['rois'], r['masks'], r['class_ids'],
             dataset.class_names, r['scores'],
             show_bbox=False, show_mask=False,
             title="Predictions")
-        plt.savefig("{}/{}.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+        plt.savefig("{}/{}/predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+
+        visualize.display_differences(
+            image,
+            gt_bbox, gt_class_id, gt_mask,
+            r['rois'], r['class_ids'], r['scores'], r['masks'],
+            dataset.class_names, ax=get_ax(),
+            show_box=False, show_mask=False,
+            iou_threshold=0.5, score_threshold=0.5)
+        plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+
+        id_mask = 0
+        for image_mask in gt_mask:
+            cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), image_mask)
+            id_mask += 1
+
+        # calculate statistics, including AP
+        AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                r['masks'])
+        precisions_dict[image_id] = np.mean(precisions)
+        recall_dict[image_id] = np.mean(recalls)
+        # store
+        APs.append(AP)
+
+    # calculate the mean AP across all images
+    mAP = np.mean(APs)
 
     # Save to csv file
     submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
@@ -373,6 +424,19 @@ def detect(model, dataset_dir, subset):
     with open(file_path, "w") as f:
         f.write(submission)
     print("Saved to ", submit_dir)
+
+    # Save mAP to txt file
+    file_path = os.path.join(submit_dir, "map.txt")
+    with open(file_path, "w") as f:
+        f.write(mAP)
+
+    # Save precision and recall
+    file_path = os.path.join(submit_dir, "precision.txt")
+    with open(file_path, 'w') as file:
+        file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
+    file_path = os.path.join(submit_dir, "recall.txt")
+    with open(file_path, 'w') as file:
+        file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
 
 
 ############################################################

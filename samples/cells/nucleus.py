@@ -368,8 +368,7 @@ def detect(model, dataset_dir, subset):
     recall_dict = {}
     for image_id in dataset.image_ids:
         # load image, bounding boxes and masks for the image id
-        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id,
-                                                                                  use_mini_mask=False)
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id)
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects

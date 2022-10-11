@@ -393,17 +393,17 @@ def detect(model, dataset_dir, subset):
         # load image, bounding boxes and masks for the image id
         image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id)
         # Run object detection
-        results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
+        # results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
         # Display results
-        r = results[0]
-        visualize.display_differences(
-            image,
-            gt_bbox, gt_class_id, gt_mask,
-            r['rois'], r['class_ids'], r['scores'], r['masks'],
-            dataset.class_names, ax=get_ax(),
-            show_box=False, show_mask=False,
-            iou_threshold=0.5, score_threshold=0.5)
-        plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+        # r = results[0]
+        # visualize.display_differences(
+        #     image,
+        #     gt_bbox, gt_class_id, gt_mask,
+        #     r['rois'], r['class_ids'], r['scores'], r['masks'],
+        #     dataset.class_names, ax=get_ax(),
+        #     show_box=False, show_mask=False,
+        #     iou_threshold=0.5, score_threshold=0.5)
+        # plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
         # id_mask = 0
         # for image_mask in gt_mask:

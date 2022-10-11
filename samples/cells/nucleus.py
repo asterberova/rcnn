@@ -367,8 +367,6 @@ def detect(model, dataset_dir, subset):
     precisions_dict = {}
     recall_dict = {}
     for image_id in dataset.image_ids:
-        # load image, bounding boxes and masks for the image id
-        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id)
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects
@@ -392,6 +390,12 @@ def detect(model, dataset_dir, subset):
             title="Predictions")
         plt.savefig("{}/{}/predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
+        # load image, bounding boxes and masks for the image id
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id)
+        # Run object detection
+        results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
+        # Display results
+        r = results[0]
         visualize.display_differences(
             image,
             gt_bbox, gt_class_id, gt_mask,
@@ -401,10 +405,11 @@ def detect(model, dataset_dir, subset):
             iou_threshold=0.5, score_threshold=0.5)
         plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
-        id_mask = 0
-        for image_mask in gt_mask:
-            cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), image_mask)
-            id_mask += 1
+        # id_mask = 0
+        # for image_mask in gt_mask:
+        #     print()
+        #     cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), image_mask)
+        #     id_mask += 1
 
         # calculate statistics, including AP
         AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],

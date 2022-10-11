@@ -363,9 +363,9 @@ def detect(model, dataset_dir, subset):
     dataset.prepare()
     # Load over images
     submission = []
-    APs = list()
-    precisions_dict = {}
-    recall_dict = {}
+    # APs = list()
+    # precisions_dict = {}
+    # recall_dict = {}
     for image_id in dataset.image_ids:
         # Load image and run detection
         image = dataset.load_image(image_id)
@@ -391,7 +391,8 @@ def detect(model, dataset_dir, subset):
         plt.savefig("{}/{}/predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
         # load image, bounding boxes and masks for the image id
-        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset, config, image_id)
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
+            dataset, config, image_id)
         # Run object detection
         # results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
         # Display results
@@ -412,15 +413,15 @@ def detect(model, dataset_dir, subset):
         #     id_mask += 1
 
         # calculate statistics, including AP
-        AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
-                                                r['masks'])
-        precisions_dict[image_id] = np.mean(precisions)
-        recall_dict[image_id] = np.mean(recalls)
-        # store
-        APs.append(AP)
+        # AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+        #                                         r['masks'])
+        # precisions_dict[image_id] = np.mean(precisions)
+        # recall_dict[image_id] = np.mean(recalls)
+        # # store
+        # APs.append(AP)
 
     # calculate the mean AP across all images
-    mAP = np.mean(APs)
+    # mAP = np.mean(APs)
 
     # Save to csv file
     submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
@@ -429,18 +430,18 @@ def detect(model, dataset_dir, subset):
         f.write(submission)
     print("Saved to ", submit_dir)
 
-    # Save mAP to txt file
-    file_path = os.path.join(submit_dir, "map.txt")
-    with open(file_path, "w") as f:
-        f.write(mAP)
-
-    # Save precision and recall
-    file_path = os.path.join(submit_dir, "precision.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
-    file_path = os.path.join(submit_dir, "recall.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
+    # # Save mAP to txt file
+    # file_path = os.path.join(submit_dir, "map.txt")
+    # with open(file_path, "w") as f:
+    #     f.write(mAP)
+    #
+    # # Save precision and recall
+    # file_path = os.path.join(submit_dir, "precision.txt")
+    # with open(file_path, 'w') as file:
+    #     file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
+    # file_path = os.path.join(submit_dir, "recall.txt")
+    # with open(file_path, 'w') as file:
+    #     file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
 
 
 ############################################################

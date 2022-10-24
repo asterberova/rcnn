@@ -443,10 +443,11 @@ def detect(model, dataset_dir, subset):
     # Save precision and recall
     file_path = os.path.join(submit_dir, "precision.txt")
     with open(file_path, 'w') as file:
-        file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
+        file.write(json.dumps(str(precisions_dict)))  # use `json.loads` to do the reverse
+
     file_path = os.path.join(submit_dir, "recall.txt")
     with open(file_path, 'w') as file:
-        file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
+        file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
 
 
 ############################################################

@@ -414,8 +414,9 @@ def detect(model, dataset_dir, subset):
             print("saved")
             unmolded_mask = np.array(utils.unmold_mask(mask, roi, image.shape))
             print(unmolded_mask)
+            print(unmolded_mask.astype(np.int32))
             print(unmolded_mask.shape)
-            visualize.display_images()
+            visualize.display_images(unmolded_mask * 255)
             plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
 
             id_mask += 1

@@ -410,11 +410,14 @@ def detect(model, dataset_dir, subset):
         id_mask = 0
         for (mask, score, roi) in zip(r['masks'], r['scores'], r['rois']):
             print(f"Mask {id_mask} - score: {score}")
-            if score > 0.8:
-                print("saved")
-                unmolded_mask = utils.unmold_mask(mask, roi, image.shape)
-                visualize.display_images([unmolded_mask] * 255)
-                plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
+            # if score > 0.8:
+            print("saved")
+            unmolded_mask = np.array(utils.unmold_mask(mask, roi, image.shape))
+            print(unmolded_mask)
+            print(unmolded_mask.shape)
+            visualize.display_images()
+            plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
+
             id_mask += 1
 
         # calculate statistics, including AP

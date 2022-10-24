@@ -407,11 +407,11 @@ def detect(model, dataset_dir, subset):
         plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
         id_mask = 0
-        for (mask, score) in zip(r['masks'], r['scores']):
+        for (mask, score, roi) in zip(r['masks'], r['scores'], r['rois']):
             print(f"Score: {score}")
             print("=================================================")
             print(mask)
-            unmolded_mask = utils.unmold_mask(mask, gt_bbox, image.shape)
+            unmolded_mask = utils.unmold_mask(mask, roi, image.shape)
             cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), unmolded_mask)
             id_mask += 1
 

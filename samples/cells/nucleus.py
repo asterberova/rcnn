@@ -373,6 +373,8 @@ def detect(model, dataset_dir, subset):
         # Detect objects
         r = model.detect([image], verbose=0)[0]
         print(r)
+        print('shape')
+        print(r['masks'].shape)
         print('=======================================================================================')
         # Encode image to RLE. Returns a string of multiple lines
         source_id = dataset.image_info[image_id]["id"]

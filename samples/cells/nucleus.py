@@ -413,7 +413,7 @@ def detect(model, dataset_dir, subset):
             if score > 0.8:
                 print("saved")
                 unmolded_mask = utils.unmold_mask(mask, roi, image.shape)
-                visualize.display_images([unmolded_mask])
+                visualize.display_images([unmolded_mask] * 255)
                 plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
             id_mask += 1
 

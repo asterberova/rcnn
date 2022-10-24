@@ -425,6 +425,9 @@ def detect(model, dataset_dir, subset):
         # store
         APs.append(AP)
 
+        if image_id == 0:
+            break
+
     # calculate the mean AP across all images
     mAP = np.mean(APs)
 

@@ -363,9 +363,9 @@ def detect(model, dataset_dir, subset):
     dataset.prepare()
     # Load over images
     submission = []
-    # APs = list()
-    # precisions_dict = {}
-    # recall_dict = {}
+    APs = list()
+    precisions_dict = {}
+    recall_dict = {}
     for image_id in dataset.image_ids:
         # Load image and run detection
         image = dataset.load_image(image_id)
@@ -406,22 +406,22 @@ def detect(model, dataset_dir, subset):
             iou_threshold=0.5, score_threshold=0.5)
         plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
-        # id_mask = 0
-        # for image_mask in gt_mask:
-        #     print()
-        #     cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), image_mask)
-        #     id_mask += 1
+        id_mask = 0
+        for image_mask in r['masks']:
+            print()
+            cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), image_mask)
+            id_mask += 1
 
         # calculate statistics, including AP
-        # AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
-        #                                         r['masks'])
-        # precisions_dict[image_id] = np.mean(precisions)
-        # recall_dict[image_id] = np.mean(recalls)
-        # # store
-        # APs.append(AP)
+        AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                r['masks'])
+        precisions_dict[image_id] = np.mean(precisions)
+        recall_dict[image_id] = np.mean(recalls)
+        # store
+        APs.append(AP)
 
     # calculate the mean AP across all images
-    # mAP = np.mean(APs)
+    mAP = np.mean(APs)
 
     # Save to csv file
     submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
@@ -431,17 +431,17 @@ def detect(model, dataset_dir, subset):
     print("Saved to ", submit_dir)
 
     # # Save mAP to txt file
-    # file_path = os.path.join(submit_dir, "map.txt")
-    # with open(file_path, "w") as f:
-    #     f.write(mAP)
-    #
-    # # Save precision and recall
-    # file_path = os.path.join(submit_dir, "precision.txt")
-    # with open(file_path, 'w') as file:
-    #     file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
-    # file_path = os.path.join(submit_dir, "recall.txt")
-    # with open(file_path, 'w') as file:
-    #     file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
+    file_path = os.path.join(submit_dir, "map.txt")
+    with open(file_path, "w") as f:
+        f.write(mAP)
+
+    # Save precision and recall
+    file_path = os.path.join(submit_dir, "precision.txt")
+    with open(file_path, 'w') as file:
+        file.write(json.dumps(precisions_dict))  # use `json.loads` to do the reverse
+    file_path = os.path.join(submit_dir, "recall.txt")
+    with open(file_path, 'w') as file:
+        file.write(json.dumps(recall_dict))  # use `json.loads` to do the reverse
 
 
 ############################################################

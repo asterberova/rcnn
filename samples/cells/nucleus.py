@@ -367,6 +367,7 @@ def detect(model, dataset_dir, subset):
     precisions_dict = {}
     recall_dict = {}
     for image_id in dataset.image_ids:
+        print(f"Detection on image: {image_id}")
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects
@@ -408,15 +409,12 @@ def detect(model, dataset_dir, subset):
 
         id_mask = 0
         for (mask, score, roi) in zip(r['masks'], r['scores'], r['rois']):
-            print(f"Score: {score}")
-            print("=================================================")
-            print(mask)
-            unmolded_mask = utils.unmold_mask(mask, roi, image.shape)
-            print("=================================================")
-            print(unmolded_mask)
-            # cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), unmolded_mask)
-            visualize.display_images([unmolded_mask])
-            plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
+            print(f"Mask {id_mask} - score: {score}")
+            if score > 0.8:
+                print("saved")
+                unmolded_mask = utils.unmold_mask(mask, roi, image.shape)
+                visualize.display_images([unmolded_mask])
+                plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
             id_mask += 1
 
         # calculate statistics, including AP
@@ -440,7 +438,7 @@ def detect(model, dataset_dir, subset):
     # # Save mAP to txt file
     file_path = os.path.join(submit_dir, "map.txt")
     with open(file_path, "w") as f:
-        f.write(mAP)
+        f.write(str(mAP))
 
     # Save precision and recall
     file_path = os.path.join(submit_dir, "precision.txt")

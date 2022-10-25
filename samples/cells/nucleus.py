@@ -395,6 +395,22 @@ def detect(model, dataset_dir, subset):
             title="Predictions")
         plt.savefig("{}/{}/predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
+        num_of_confident_masks = 0
+        id_mask = 0
+        N = len(r['scores'])
+        for i in range(N):
+            # Score
+            score = r['scores'][i]
+            # Mask
+            mask = r['masks'][:, :, i]
+            print(f'Mask shape {mask.shape}')
+            print(mask)
+            if score > 0.8:
+                mask_img = mask * 255
+                print(mask_img)
+                cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)
+                id_mask += 1
+
         # load image, bounding boxes and masks for the image id
         image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
             dataset, config, image_id)

@@ -366,16 +366,13 @@ def detect(model, dataset_dir, subset):
     APs = list()
     precisions_dict = {}
     recall_dict = {}
+    num_of_confident_masks = 0
     for image_id in dataset.image_ids:
         print(f"Detection on image: {image_id}")
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects
         r = model.detect([image], verbose=0)[0]
-        print(r)
-        print('shape')
-        print(r['masks'].shape)
-        print('=======================================================================================')
         # Encode image to RLE. Returns a string of multiple lines
         source_id = dataset.image_info[image_id]["id"]
         rle = mask_to_rle(source_id, r["masks"], r["scores"])
@@ -395,7 +392,6 @@ def detect(model, dataset_dir, subset):
             title="Predictions")
         plt.savefig("{}/{}/predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
-        num_of_confident_masks = 0
         id_mask = 0
         N = len(r['scores'])
         for i in range(N):
@@ -403,13 +399,14 @@ def detect(model, dataset_dir, subset):
             score = r['scores'][i]
             # Mask
             mask = r['masks'][:, :, i]
-            print(f'Mask shape {mask.shape}')
-            print(mask)
+            # print(f'Mask shape {mask.shape}')
+            # print(mask)
             if score > 0.8:
                 mask_img = mask * 255
                 print(mask_img)
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)
                 id_mask += 1
+                num_of_confident_masks += 1
 
         # load image, bounding boxes and masks for the image id
         image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
@@ -427,32 +424,6 @@ def detect(model, dataset_dir, subset):
             iou_threshold=0.5, score_threshold=0.5)
         plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
-        print(results)
-
-        # id_mask = 0
-        # for (mask, score, roi) in zip(r['masks'], r['scores'], r['rois']):
-        #     print(f"Mask {id_mask} - score: {score}")
-        #     # if score > 0.8:
-        #     print("saved")
-        #     print(f"Mask shape {mask.shape}")
-        #     print(mask)
-        #     print('ROI')
-        #     print(roi)
-        #     print('------------------------------ Unmolded mask')
-        #     # unmolded_mask = np.array(utils.unmold_mask(mask, roi, image.shape))
-        #     # print(unmolded_mask)
-        #     # print(unmolded_mask.astype(np.int32))
-        #     # print(unmolded_mask.shape)
-        #     # visualize.display_images(unmolded_mask * 255)
-        #     # plt.savefig('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)))
-        #
-        #     id_mask += 1
-
-
-
-
-
-
         # calculate statistics, including AP
         AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                 r['masks'])
@@ -461,8 +432,8 @@ def detect(model, dataset_dir, subset):
         # store
         APs.append(AP)
 
-        if image_id == 3:
-            break
+        # if image_id == 3:
+        #     break
 
     # calculate the mean AP across all images
     mAP = np.mean(APs)
@@ -487,6 +458,8 @@ def detect(model, dataset_dir, subset):
     file_path = os.path.join(submit_dir, "recall.txt")
     with open(file_path, 'w') as file:
         file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
+
+    print(f"Predicted in total {num_of_confident_masks} masks with score > 0.8")
 
 
 ############################################################

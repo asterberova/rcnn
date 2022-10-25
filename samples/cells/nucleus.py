@@ -408,56 +408,56 @@ def detect(model, dataset_dir, subset):
                 id_mask += 1
                 num_of_confident_masks += 1
 
-        # load image, bounding boxes and masks for the image id
-        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
-            dataset, config, image_id)
-        # Run object detection
-        results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
-        # Display results
-        r = results[0]
-        visualize.display_differences(
-            image,
-            gt_bbox, gt_class_id, gt_mask,
-            r['rois'], r['class_ids'], r['scores'], r['masks'],
-            dataset.class_names, ax=get_ax(),
-            show_box=False, show_mask=False,
-            iou_threshold=0.5, score_threshold=0.5)
-        plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
-
-        # calculate statistics, including AP
-        AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
-                                                r['masks'])
-        precisions_dict[image_id] = np.mean(precisions)
-        recall_dict[image_id] = np.mean(recalls)
-        # store
-        APs.append(AP)
-
-        # if image_id == 3:
-        #     break
-
-    # calculate the mean AP across all images
-    mAP = np.mean(APs)
-
-    # Save to csv file
-    submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
-    file_path = os.path.join(submit_dir, "submit.csv")
-    with open(file_path, "w") as f:
-        f.write(submission)
-    print("Saved to ", submit_dir)
-
-    # # Save mAP to txt file
-    file_path = os.path.join(submit_dir, "map.txt")
-    with open(file_path, "w") as f:
-        f.write(str(mAP))
-
-    # Save precision and recall
-    file_path = os.path.join(submit_dir, "precision.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(str(precisions_dict)))  # use `json.loads` to do the reverse
-
-    file_path = os.path.join(submit_dir, "recall.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
+    #     # load image, bounding boxes and masks for the image id
+    #     image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
+    #         dataset, config, image_id)
+    #     # Run object detection
+    #     results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
+    #     # Display results
+    #     r = results[0]
+    #     visualize.display_differences(
+    #         image,
+    #         gt_bbox, gt_class_id, gt_mask,
+    #         r['rois'], r['class_ids'], r['scores'], r['masks'],
+    #         dataset.class_names, ax=get_ax(),
+    #         show_box=False, show_mask=False,
+    #         iou_threshold=0.5, score_threshold=0.5)
+    #     plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+    #
+    #     # calculate statistics, including AP
+    #     AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+    #                                             r['masks'])
+    #     precisions_dict[image_id] = np.mean(precisions)
+    #     recall_dict[image_id] = np.mean(recalls)
+    #     # store
+    #     APs.append(AP)
+    #
+    #     # if image_id == 3:
+    #     #     break
+    #
+    # # calculate the mean AP across all images
+    # mAP = np.mean(APs)
+    #
+    # # Save to csv file
+    # submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
+    # file_path = os.path.join(submit_dir, "submit.csv")
+    # with open(file_path, "w") as f:
+    #     f.write(submission)
+    # print("Saved to ", submit_dir)
+    #
+    # # # Save mAP to txt file
+    # file_path = os.path.join(submit_dir, "map.txt")
+    # with open(file_path, "w") as f:
+    #     f.write(str(mAP))
+    #
+    # # Save precision and recall
+    # file_path = os.path.join(submit_dir, "precision.txt")
+    # with open(file_path, 'w') as file:
+    #     file.write(json.dumps(str(precisions_dict)))  # use `json.loads` to do the reverse
+    #
+    # file_path = os.path.join(submit_dir, "recall.txt")
+    # with open(file_path, 'w') as file:
+    #     file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
 
     print(f"Predicted in total {num_of_confident_masks} masks with score > 0.8")
 

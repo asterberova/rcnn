@@ -403,7 +403,7 @@ def detect(model, dataset_dir, subset):
             # print(mask)
             if score > 0.8:
                 mask_img = mask * 255
-                print(mask_img)
+                # print(mask_img)
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)
                 id_mask += 1
                 num_of_confident_masks += 1

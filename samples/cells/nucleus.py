@@ -499,10 +499,10 @@ if __name__ == '__main__':
     parser.add_argument('--subset', required=False,
                         metavar="Dataset sub-directory",
                         help="Subset of dataset to run prediction on")
-    parser.add_argument('--mask_score', required=False,
+    parser.add_argument('--mask_score', required=False, type=float,
                         metavar="Mask score to detect and save mask",
                         help="Threshold of mask score to be detected")
-    parser.add_argument('--stats', required=False,
+    parser.add_argument('--stats', required=False, type=bool,
                         metavar="Compute statistics of detection",
                         help="Should compute statistics of detection")
     args = parser.parse_args()

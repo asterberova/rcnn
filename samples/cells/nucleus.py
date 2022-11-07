@@ -440,10 +440,10 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)
             # store
-            if type(AP) == float:
+            if type(AP) == float or type(f1) == int:
                 APs.append(AP)
             f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
-            if type(f1) == float:
+            if type(f1) == float or type(f1) == int:
                 F1_scores.append(f1)
 
     if count_statistics:

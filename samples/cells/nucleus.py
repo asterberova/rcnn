@@ -418,7 +418,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # Display results
             # r = results[0]
             # New prediction https://github.com/matterport/Mask_RCNN/issues/2165
-            scaled_image = model.mold_image(image, config)
+            scaled_image = modellib.mold_image(image, config)
             sample = np.expand_dims(scaled_image, 0)
             yhat = model.detect(sample, verbose=0)
             r = yhat[0]

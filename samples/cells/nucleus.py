@@ -444,7 +444,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
                 APs.append(AP)
             f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
             if f1:
-                F1_scores.append()
+                F1_scores.append(f1)
 
     if count_statistics:
         # calculate the mean AP and mean F1 across all tested images

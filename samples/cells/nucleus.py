@@ -470,7 +470,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
     with open(file_path, "w") as f:
         f.write(submission)
     print("Saved to ", submit_dir)
-    print(f"Predicted in total {num_of_confident_masks} masks with score > 0.8")
+    print(f"Predicted in total {num_of_confident_masks} masks with score > {mask_score}")
 
 
 ############################################################

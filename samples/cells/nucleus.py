@@ -440,8 +440,11 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)
             # store
-            APs.append(AP)
-            F1_scores.append((2 * (np.mean(precisions) * np.mean(recalls)))/(np.mean(precisions) + np.mean(recalls)))
+            if AP:
+                APs.append(AP)
+            f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
+            if f1:
+                F1_scores.append()
 
     if count_statistics:
         # calculate the mean AP and mean F1 across all tested images
@@ -451,11 +454,11 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
         # # Save mAP to txt file
         file_path = os.path.join(submit_dir, "statistics.txt")
         with open(file_path, "w") as f:
-            f.write(f'Mean AP: {str(mAP)}')
-            f.write(f'Mean F1: {str(mF1)}')
-            f.write(f'------------------------------------------')
-            f.write(f'APs: {str(APs)}')
-            f.write(f'F1 scores: {str(F1_scores)}')
+            f.write(f'Mean AP: {str(mAP)} \n')
+            f.write(f'Mean F1: {str(mF1)} \n')
+            f.write(f'------------------------------------------\n')
+            f.write(f'APs: {str(APs)} \n')
+            f.write(f'F1 scores: {str(F1_scores)} \n')
         # Save precision and recall
         file_path = os.path.join(submit_dir, "precision.txt")
         with open(file_path, 'w') as file:

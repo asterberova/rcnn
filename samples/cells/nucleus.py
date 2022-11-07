@@ -346,7 +346,7 @@ def mask_to_rle(image_id, mask, scores):
 #  Detection
 ############################################################
 
-def detect(model, dataset_dir, subset):
+def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
     """Run detection on images in the given directory."""
     print("Running on {}".format(dataset_dir))
 
@@ -364,6 +364,7 @@ def detect(model, dataset_dir, subset):
     # Load over images
     submission = []
     APs = list()
+    F1_scores = list()
     precisions_dict = {}
     recall_dict = {}
     num_of_confident_masks = 0
@@ -400,43 +401,68 @@ def detect(model, dataset_dir, subset):
             # Mask
             mask = r['masks'][:, :, i]
             # print(f'Mask shape {mask.shape}')
-            # print(mask)
-            if score > 0.8:
+            # if score > 0.8:
+            if score > mask_score:
                 mask_img = mask * 255
                 # print(mask_img)
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)
                 id_mask += 1
                 num_of_confident_masks += 1
 
-        # load image, bounding boxes and masks for the image id
-        image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
-            dataset, config, image_id)
-        # Run object detection
-        results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
-        # Display results
-        r = results[0]
-        visualize.display_differences(
-            image,
-            gt_bbox, gt_class_id, gt_mask,
-            r['rois'], r['class_ids'], r['scores'], r['masks'],
-            dataset.class_names, ax=get_ax(),
-            show_box=False, show_mask=False,
-            iou_threshold=0.5, score_threshold=0.5)
-        plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+        if count_statistics:
+            # load image, bounding boxes and masks for the image id
+            image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
+                dataset, config, image_id)
+            # Run object detection
+            # results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
+            # Display results
+            # r = results[0]
+            # New prediction https://github.com/matterport/Mask_RCNN/issues/2165
+            scaled_image = model.mold_image(image, config)
+            sample = np.expand_dims(scaled_image, 0)
+            yhat = model.detect(sample, verbose=0)
+            r = yhat[0]
+            try:
+                visualize.display_differences(
+                    image,
+                    gt_bbox, gt_class_id, gt_mask,
+                    r['rois'], r['class_ids'], r['scores'], r['masks'],
+                    dataset.class_names, ax=get_ax(),
+                    show_box=False, show_mask=False,
+                    iou_threshold=0.5, score_threshold=0.5)
+                plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+            except Exception as e:
+                print(f"Visualize display_differences failed on {str(e)}")
 
-        # calculate statistics, including AP
-        AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
-                                                r['masks'])
-        precisions_dict[image_id] = np.mean(precisions)
-        recall_dict[image_id] = np.mean(recalls)
-        # store
-        APs.append(AP)
+            # calculate statistics, including AP
+            AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                    r['masks'])
+            precisions_dict[image_id] = np.mean(precisions)
+            recall_dict[image_id] = np.mean(recalls)
+            # store
+            APs.append(AP)
+            F1_scores.append((2 * (np.mean(precisions) * np.mean(recalls)))/(np.mean(precisions) + np.mean(recalls)))
 
-        # if image_id == 3:
-        #     break
+    if count_statistics:
+        # calculate the mean AP and mean F1 across all tested images
+        mAP = np.mean(APs)
+        mF1 = np.mean(F1_scores)
 
-    # calculate the mean AP across all images
-    mAP = np.mean(APs)
+        # # Save mAP to txt file
+        file_path = os.path.join(submit_dir, "statistics.txt")
+        with open(file_path, "w") as f:
+            f.write(f'Mean AP: {str(mAP)}')
+            f.write(f'Mean F1: {str(mF1)}')
+            f.write(f'------------------------------------------')
+            f.write(f'APs: {str(APs)}')
+            f.write(f'F1 scores: {str(F1_scores)}')
+        # Save precision and recall
+        file_path = os.path.join(submit_dir, "precision.txt")
+        with open(file_path, 'w') as file:
+            file.write(json.dumps(str(precisions_dict)))  # use `json.loads` to do the reverse
+        file_path = os.path.join(submit_dir, "recall.txt")
+        with open(file_path, 'w') as file:
+            file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
 
     # Save to csv file
     submission = "ImageId,EncodedPixels\n" + "\n".join(submission)
@@ -444,21 +470,6 @@ def detect(model, dataset_dir, subset):
     with open(file_path, "w") as f:
         f.write(submission)
     print("Saved to ", submit_dir)
-
-    # # Save mAP to txt file
-    file_path = os.path.join(submit_dir, "map.txt")
-    with open(file_path, "w") as f:
-        f.write(str(mAP))
-
-    # Save precision and recall
-    file_path = os.path.join(submit_dir, "precision.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(str(precisions_dict)))  # use `json.loads` to do the reverse
-
-    file_path = os.path.join(submit_dir, "recall.txt")
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(str(recall_dict)))  # use `json.loads` to do the reverse
-
     print(f"Predicted in total {num_of_confident_masks} masks with score > 0.8")
 
 
@@ -488,6 +499,12 @@ if __name__ == '__main__':
     parser.add_argument('--subset', required=False,
                         metavar="Dataset sub-directory",
                         help="Subset of dataset to run prediction on")
+    parser.add_argument('--mask_score', required=False,
+                        metavar="Mask score to detect and save mask",
+                        help="Threshold of mask score to be detected")
+    parser.add_argument('--stats', required=False,
+                        metavar="Compute statistics of detection",
+                        help="Should compute statistics of detection")
     args = parser.parse_args()
 
     # Validate arguments
@@ -547,7 +564,7 @@ if __name__ == '__main__':
     if args.command == "train":
         train(model, args.dataset, args.subset)
     elif args.command == "detect":
-        detect(model, args.dataset, args.subset)
+        detect(model, args.dataset, args.subset, args.mask_score, args.stats)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'detect'".format(args.command))

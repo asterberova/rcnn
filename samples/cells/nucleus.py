@@ -239,7 +239,7 @@ class CellsDataset(utils.Dataset):
 #  Training
 ############################################################
 
-def train(model, dataset_dir, subset):
+def train(model, dataset_dir, subset, n_epochs=50):
     """Train the model."""
     # Training dataset.
     dataset_train = CellsDataset()
@@ -277,7 +277,7 @@ def train(model, dataset_dir, subset):
     print("Train all layers")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=50,
+                epochs=n_epochs,
                 augmentation=augmentation,
                 layers='all')
 
@@ -508,6 +508,9 @@ if __name__ == '__main__':
     parser.add_argument('--stats', required=False, type=bool,
                         metavar="Compute statistics of detection",
                         help="Should compute statistics of detection")
+    parser.add_argument('--epoch', required=False, type=int,
+                        metavar="Compute statistics of detection",
+                        help="Should compute statistics of detection")
     args = parser.parse_args()
 
     # Validate arguments
@@ -565,7 +568,7 @@ if __name__ == '__main__':
 
     # Train or evaluate
     if args.command == "train":
-        train(model, args.dataset, args.subset)
+        train(model, args.dataset, args.subset, args.epoch)
     elif args.command == "detect":
         detect(model, args.dataset, args.subset, args.mask_score, args.stats)
     else:

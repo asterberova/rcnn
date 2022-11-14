@@ -409,6 +409,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
                 id_mask += 1
                 num_of_confident_masks += 1
 
+        print(f"count_statistics: {count_statistics}, type: {type(count_statistics)}")
         if count_statistics:
             # load image, bounding boxes and masks for the image id
             image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
@@ -418,10 +419,11 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # Display results
             # r = results[0]
             # New prediction https://github.com/matterport/Mask_RCNN/issues/2165
-            scaled_image = modellib.mold_image(image, config)
-            sample = np.expand_dims(scaled_image, 0)
-            yhat = model.detect(sample, verbose=0)
-            r = yhat[0]
+            # scaled_image = modellib.mold_image(image, config)
+            # sample = np.expand_dims(scaled_image, 0)
+            # yhat = model.detect(sample, verbose=0)
+            # r = yhat[0]
+            r = model.detect([image], verbose=0)[0]
             try:
                 visualize.display_differences(
                     image,
@@ -445,6 +447,9 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
             if type(f1) == float or type(f1) == int:
                 F1_scores.append(f1)
+            print(f"TYPE AP: {type(AP)}")
+            print(f"TYPE F1: {type(f1)}")
+
 
     if count_statistics:
         # calculate the mean AP and mean F1 across all tested images

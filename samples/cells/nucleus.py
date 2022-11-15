@@ -411,7 +411,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
 
         print(f"count_statistics: {count_statistics}, type: {type(count_statistics)}")
         if count_statistics:
-            # load image, bounding boxes and masks for the image id
+            # load image, bounding boxes and masks for the image id and graound truth
             image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
                 dataset, config, image_id)
             # Run object detection
@@ -423,7 +423,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # sample = np.expand_dims(scaled_image, 0)
             # yhat = model.detect(sample, verbose=0)
             # r = yhat[0]
-            r = model.detect([image], verbose=0)[0]
+            # r = model.detect([image], verbose=0)[0]
             try:
                 visualize.display_differences(
                     image,

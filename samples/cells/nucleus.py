@@ -412,7 +412,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
         print(f"count_statistics: {count_statistics}, type: {type(count_statistics)}")
         if count_statistics:
             # load image, bounding boxes and masks for the image id and graound truth
-            image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
+            image2, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
                 dataset, config, image_id)
             print("Original image shape: ",
                   modellib.parse_image_meta(image_meta[np.newaxis, ...])["original_image_shape"][0])
@@ -426,7 +426,9 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # sample = np.expand_dims(scaled_image, 0)
             # yhat = model.detect(sample, verbose=0)
             # r = yhat[0]
-            r2 = model.detect([image], verbose=0)[0]
+            r2 = model.detect([image2], verbose=0)[0]
+            print(f"IMAGE 1 --------------- {np.shape(image)}")
+            print(f"IMAGE 2 --------------- {np.shape(image2)}")
             print(f"R1 --------------- {np.shape(r)}")
             print(f"R2 --------------- {np.shape(r2)}")
             print(r)

@@ -414,6 +414,9 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # load image, bounding boxes and masks for the image id and graound truth
             image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(
                 dataset, config, image_id)
+            print("Original image shape: ",
+                  modellib.parse_image_meta(image_meta[np.newaxis, ...])["original_image_shape"][0])
+
             # Run object detection
             # results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
             # Display results
@@ -423,7 +426,13 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # sample = np.expand_dims(scaled_image, 0)
             # yhat = model.detect(sample, verbose=0)
             # r = yhat[0]
-            # r = model.detect([image], verbose=0)[0]
+            r2 = model.detect([image], verbose=0)[0]
+            print(f"R1 --------------- {np.shape(r)}")
+            print(f"R2 --------------- {np.shape(r2)}")
+            print(r)
+            print(r2)
+
+
             try:
                 visualize.display_differences(
                     image,
@@ -448,7 +457,7 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             if np.char.isnumeric(f1):
                 F1_scores.append(f1)
             print(f"AP: {AP}, TYPE AP: {type(AP)}, is numeric: {np.char.isnumeric(AP)}")
-            print(f"F1: {f1}, TYPE F1: {type(f1)}, is numeric: {np.char.isnumeric(F1)}")
+            print(f"F1: {f1}, TYPE F1: {type(f1)}, is numeric: {np.char.isnumeric(f1)}")
 
 
     if count_statistics:

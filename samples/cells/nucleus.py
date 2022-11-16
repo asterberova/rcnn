@@ -426,14 +426,6 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             # sample = np.expand_dims(scaled_image, 0)
             # yhat = model.detect(sample, verbose=0)
             # r = yhat[0]
-            r2 = model.detect([image2], verbose=0)[0]
-            print(f"IMAGE 1 --------------- {np.shape(image)}")
-            print(f"IMAGE 2 --------------- {np.shape(image2)}")
-            print(f"R1 --------------- {np.shape(r)}")
-            print(f"R2 --------------- {np.shape(r2)}")
-            print(r)
-            print(r2)
-
 
             try:
                 visualize.display_differences(
@@ -458,8 +450,8 @@ def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
             f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
             if f1 != 'nan':
                 F1_scores.append(f1)
-            print(f"AP: {AP}, TYPE AP: {type(AP)}")
-            print(f"F1: {f1}, TYPE F1: {type(f1)}")
+            # print(f"AP: {AP}, TYPE AP: {type(AP)}")
+            # print(f"F1: {f1}, TYPE F1: {type(f1)}")
 
 
     if count_statistics:

@@ -579,6 +579,7 @@ if __name__ == '__main__':
     if args.command == "train":
         train(model, args.dataset, args.subset, args.epoch)
     elif args.command == "detect":
+        print(f"DETECTION, stats: {args.stats}")
         detect(model, args.dataset, args.subset, args.mask_score, args.stats)
     else:
         print("'{}' is not recognized. "

@@ -347,7 +347,7 @@ def mask_to_rle(image_id, mask, scores):
 #  Detection
 ############################################################
 
-def detect(model, dataset_dir, subset, mask_score=0.8, count_statistics=True):
+def detect(model, dataset_dir, subset, mask_score, count_statistics):
     """Run detection on images in the given directory."""
     print("Running on {}".format(dataset_dir))
 
@@ -514,10 +514,10 @@ if __name__ == '__main__':
     parser.add_argument('--mask_score', required=False, type=float,
                         metavar="Mask score to detect and save mask",
                         help="Threshold of mask score to be detected")
-    parser.add_argument('--stats', required=False, type=bool,
+    parser.add_argument('--stats', required=False, type=bool, default=True,
                         metavar="Compute statistics of detection",
                         help="Should compute statistics of detection")
-    parser.add_argument('--epoch', required=False, type=int,
+    parser.add_argument('--epoch', required=False, type=int, default=0.8,
                         metavar="Compute statistics of detection",
                         help="Should compute statistics of detection")
     args = parser.parse_args()

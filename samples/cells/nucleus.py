@@ -514,9 +514,9 @@ if __name__ == '__main__':
     parser.add_argument('--mask_score', required=False, type=float,
                         metavar="Mask score to detect and save mask",
                         help="Threshold of mask score to be detected")
-    parser.add_argument('--stats', required=False, type=bool,
+    parser.add_argument('--stats', required=False, type=int, default=False,
                         metavar="Compute statistics of detection",
-                        help="Should compute statistics of detection")
+                        help="0/1 : don't compute/compute")
     parser.add_argument('--epoch', required=False, type=int,
                         metavar="Compute statistics of detection",
                         help="Should compute statistics of detection")

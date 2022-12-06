@@ -101,7 +101,7 @@ class CellsConfig(Config):
 
     # Input image resizing
     # Random crops of size 512x512
-    IMAGE_RESIZE_MODE = "pad64"
+    IMAGE_RESIZE_MODE = "none"
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
     IMAGE_MIN_SCALE = 1.0
@@ -148,7 +148,7 @@ class CellsInferenceConfig(CellsConfig):
     IMAGES_PER_GPU = 1
     # Don't resize imager for inferencing
     # pad64/crop/square/none
-    IMAGE_RESIZE_MODE = "pad64"
+    IMAGE_RESIZE_MODE = "none"
     IMAGE_MIN_SCALE = 1.0
 
     # Non-max suppression threshold to filter RPN proposals.

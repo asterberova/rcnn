@@ -104,7 +104,7 @@ class CellsConfig(Config):
     IMAGE_RESIZE_MODE = "none"
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
-    IMAGE_MIN_SCALE = 1.0
+    IMAGE_MIN_SCALE = 0.0
 
     # Length of square anchor side in pixels
     RPN_ANCHOR_SCALES = (8, 16, 32, 64, 128)

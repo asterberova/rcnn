@@ -149,7 +149,7 @@ class CellsInferenceConfig(CellsConfig):
     # Don't resize imager for inferencing
     # pad64/crop/square/none
     IMAGE_RESIZE_MODE = "none"
-    IMAGE_MIN_SCALE = 1.0
+    IMAGE_MIN_SCALE = 0.0
 
     # Non-max suppression threshold to filter RPN proposals.
     # You can increase this during training to generate more propsals.

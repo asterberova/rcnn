@@ -84,6 +84,9 @@ class CellsConfig(Config):
     # Adjust depending on your GPU memory
     IMAGES_PER_GPU = 8
 
+    GPU_COUNT = 1
+
+
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cells
 

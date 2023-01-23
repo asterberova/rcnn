@@ -82,17 +82,20 @@ class CellsConfig(Config):
     NAME = "cells"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 8
+    IMAGES_PER_GPU = 4
 
-    GPU_COUNT = 1
+    # GPU_COUNT = 1
 
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cells
 
     # Number of training and validation steps per epoch
-    STEPS_PER_EPOCH = 1000 // IMAGES_PER_GPU
-    VALIDATION_STEPS = max(1, 100 // IMAGES_PER_GPU)
+    # STEPS_PER_EPOCH = 1000 // IMAGES_PER_GPU
+    # VALIDATION_STEPS = max(1, 100 // IMAGES_PER_GPU)
+    STEPS_PER_EPOCH = 100
+    VALIDATION_STEPS = 20
+
 
     # Don't exclude based on confidence. Since we have two classes
     # then 0.5 is the minimum anyway as it picks between cell and BG

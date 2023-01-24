@@ -82,7 +82,7 @@ class CellsConfig(Config):
     NAME = "cells"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 8
+    IMAGES_PER_GPU = 7
 
     # GPU_COUNT = 1
 

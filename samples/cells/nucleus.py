@@ -84,7 +84,7 @@ class CellsConfig(Config):
     # Adjust depending on your GPU memory
     IMAGES_PER_GPU = 6
     # GPU_COUNT = 1
-    LEARNING_RATE = 0.01
+    LEARNING_RATE = 0.0001
 
 
     # Number of classes (including background)

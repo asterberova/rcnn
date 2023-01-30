@@ -451,14 +451,32 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # calculate statistics, including AP
             AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
+
+            print(f"AP: {AP}, TYPE AP: {type(AP)}")
+            if np.isnan(AP):
+                print(f'AP is {AP} in image {image_id}')
+            else:
+                APs.append(AP)
+
+            if np.isnan(np.mean(precisions)) or np.isnan(np.mean(recalls)):
+                print(f'precision is {precisions} in image {image_id}')
+                print(f'recall is {recalls} in image {image_id}')
+            else:
+                f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
+                print(f"F1: {f1}, TYPE F1: {type(f1)}")
+                if np.isnan(f1):
+                    print(f'F1 is {f1} in image {image_id}')
+                else:
+                    F1_scores.append(f1)
+
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)
             # store
-            if AP != 'nan':
-                APs.append(AP)
-            f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
-            if f1 != 'nan':
-                F1_scores.append(f1)
+            # if AP != 'nan':
+            #     APs.append(AP)
+            # f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
+            # if f1 != 'nan':
+            #     F1_scores.append(f1)
             # print(f"AP: {AP}, TYPE AP: {type(AP)}")
             # print(f"F1: {f1}, TYPE F1: {type(f1)}")
 
@@ -471,8 +489,8 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         # # Save mAP to txt file
         file_path = os.path.join(submit_dir, "statistics.txt")
         with open(file_path, "w") as f:
-            f.write(f'Mean AP: {str(mAP)} \n')
-            f.write(f'Mean F1: {str(mF1)} \n')
+            f.write(f'Mean AP: {str(mAP)} \t length of AP array: {str(len(APs))} \n')
+            f.write(f'Mean F1: {str(mF1)} \t length of F1 array: {str(len(F1_scores))}\n')
             f.write(f'------------------------------------------\n')
             f.write(f'APs: {str(APs)} \n')
             f.write(f'F1 scores: {str(F1_scores)} \n')

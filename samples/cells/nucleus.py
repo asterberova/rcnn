@@ -94,7 +94,7 @@ class CellsConfig(Config):
     # STEPS_PER_EPOCH = 1000 // IMAGES_PER_GPU
     # VALIDATION_STEPS = max(1, 100 // IMAGES_PER_GPU)
     STEPS_PER_EPOCH = 100
-    VALIDATION_STEPS = 20
+    VALIDATION_STEPS = 10
 
 
     # Don't exclude based on confidence. Since we have two classes

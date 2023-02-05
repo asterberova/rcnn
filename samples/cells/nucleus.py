@@ -93,8 +93,8 @@ class CellsConfig(Config):
     # Number of training and validation steps per epoch
     # STEPS_PER_EPOCH = 1000 // IMAGES_PER_GPU
     # VALIDATION_STEPS = max(1, 100 // IMAGES_PER_GPU)
-    STEPS_PER_EPOCH = 166
-    VALIDATION_STEPS = 10
+    STEPS_PER_EPOCH = 100
+    VALIDATION_STEPS = 16
 
 
     # Don't exclude based on confidence. Since we have two classes

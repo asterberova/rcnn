@@ -55,7 +55,8 @@ from mrcnn import model as modellib
 from mrcnn import visualize
 
 # Path to trained weights file
-DSLAB_DATA = '/data/s2732815/rcnn/'
+# DSLAB_DATA = '/data/s2732815/rcnn/'
+DSLAB_DATA = '/local/s2732815/rcnn/'
 # COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 COCO_WEIGHTS_PATH = os.path.join(DSLAB_DATA, "mask_rcnn_coco.h5")
 

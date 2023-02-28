@@ -374,6 +374,8 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     # Load over images
     submission = []
     APs = list()
+    APs_range = list()
+    APs_75 = list()
     F1_scores = list()
     precisions_dict = {}
     recall_dict = {}
@@ -452,12 +454,21 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # calculate statistics, including AP
             AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
-
+            AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                    r['masks'])
+            AP_75, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                    r['masks'], iou_threshold=0.75)
             print(f"AP: {AP}, TYPE AP: {type(AP)}")
             if np.isnan(AP):
                 print(f'AP is {AP} in image {image_id}')
+                # print(f'AP_range is {AP_range} in image {image_id}')
             else:
+                print(f'AP is {AP} in image {image_id}')
+                print(f'AP_range is {AP_range} in image {image_id}')
+                print(f'AP_75 is {AP_75} in image {image_id}')
                 APs.append(AP)
+                APs_range.append(AP_range)
+                APs_75.append(AP_75)
 
             if np.isnan(np.mean(precisions)) or np.isnan(np.mean(recalls)):
                 print(f'precision is {precisions} in image {image_id}')
@@ -485,16 +496,23 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     if count_statistics:
         # calculate the mean AP and mean F1 across all tested images
         mAP = np.mean(APs)
+        mAP_range = np.mean(APs_range)
+        mAP_75 = np.mean(APs_75)
         mF1 = np.mean(F1_scores)
 
         # # Save mAP to txt file
         file_path = os.path.join(submit_dir, "statistics.txt")
         with open(file_path, "w") as f:
-            f.write(f'Mean AP: {str(mAP)} \t length of AP array: {str(len(APs))} \n')
+            f.write(f'Mean AP_50: {str(mAP)} \t length of AP array: {str(len(APs))} \n')
             f.write(f'Mean F1: {str(mF1)} \t length of F1 array: {str(len(F1_scores))}\n')
+            f.write(f'Mean AP_range: {str(mAP_range)} \t length of AP array: {str(len(APs_range))} \n')
+            f.write(f'Mean AP_75: {str(mAP_75)} \t length of AP array: {str(len(APs_75))} \n')
             f.write(f'------------------------------------------\n')
-            f.write(f'APs: {str(APs)} \n')
+            f.write(f'APs 50: {str(APs)} \n')
             f.write(f'F1 scores: {str(F1_scores)} \n')
+            f.write(f'APs range: {str(APs_range)} \n')
+            f.write(f'APs 75: {str(APs_75)} \n')
+
         # Save precision and recall
         file_path = os.path.join(submit_dir, "precision.txt")
         with open(file_path, 'w') as file:

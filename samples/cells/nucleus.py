@@ -414,7 +414,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             mask = r['masks'][:, :, i]
             # print(f'Mask shape {mask.shape}')
             # if score > 0.8:
-            if score > mask_score:
+            if score >= mask_score:
                 mask_img = mask * 255
                 # print(mask_img)
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)

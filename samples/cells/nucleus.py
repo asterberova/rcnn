@@ -385,6 +385,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     num_of_confident_masks = 0
     for image_id in dataset.image_ids:
         print(f"Detection on image: {image_id}")
+        print(f'Image: {dataset.image_info[image_id]["id"]}')
         # Load image and run detection
         image = dataset.load_image(image_id)
         # Detect objects
@@ -398,6 +399,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         if not os.path.exists(save_data):
             os.makedirs(save_data)
         save_data = os.path.join(submit_dir, dataset.image_info[image_id]["id"], 'masks')
+        if not os.path.exists(save_data):
+            os.makedirs(save_data)
+        save_data = os.path.join(submit_dir, dataset.image_info[image_id]["id"], 'pr_masks')
         if not os.path.exists(save_data):
             os.makedirs(save_data)
         # Save image with masks
@@ -433,7 +437,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 num_of_confident_masks += 1
                 pr_mask = closing(mask, element)
                 print(f'Mask shape {pr_mask.shape}')
-                print(pr_mask)
+                # print(pr_mask)
                 num_ones = (pr_mask == 1).sum()
                 print(f'Number of ones in processed mask: {num_ones}')
                 if num_ones < 512*512/2:
@@ -554,6 +558,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             f.write(f'F1 scores: {str(F1_scores)} \n')
             f.write(f'APs range: {str(APs_range)} \n')
             f.write(f'APs 75: {str(APs_75)} \n')
+            f.write(f'------------------------------------------\n')
+            f.write(f'Processed APs 50: {str(pr_APs)} \n')
+
 
         # Save precision and recall
         file_path = os.path.join(submit_dir, "precision.txt")

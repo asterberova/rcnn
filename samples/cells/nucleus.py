@@ -493,7 +493,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # calculate statistics, including AP
             AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
-            pr_AP, pr_precisions, pr_recalls = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+            pr_AP, pr_precisions, pr_recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     processed_masks)
             AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])

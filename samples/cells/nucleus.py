@@ -422,7 +422,6 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # Mask
             mask = r['masks'][:, :, i]
             print(f'Mask shape {mask.shape}')
-            print(mask)
             # pr_mask = processed_masks[:, :, i]
             # if score > 0.8:
             if score >= mask_score:
@@ -433,7 +432,10 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 id_mask += 1
                 num_of_confident_masks += 1
                 pr_mask = closing(mask, element)
+                print(f'Mask shape {pr_mask.shape}')
+                print(pr_mask)
                 num_ones = (pr_mask == 1).sum()
+                print(f'Number of ones in processed mask: {num_ones}')
                 if num_ones < 512*512/2:
                     cv2.imwrite(
                         '{}/{}/pr_masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),

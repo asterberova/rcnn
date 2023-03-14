@@ -412,7 +412,11 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             score = r['scores'][i]
             # Mask
             mask = r['masks'][:, :, i]
-            # print(f'Mask shape {mask.shape}')
+            print(f'Mask shape {mask.shape}')
+            shape_m = r['masks'].shape
+            print(f'Masks shape {shape_m}')
+            processed_mask = np.empty(shape_m)
+
             # if score > 0.8:
             if score >= mask_score:
                 mask_img = mask * 255

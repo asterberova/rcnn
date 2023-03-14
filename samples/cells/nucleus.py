@@ -41,6 +41,7 @@ import json
 import datetime
 import numpy as np
 import skimage.io
+from skimage.morphology import closing
 import cv2
 from imgaug import augmenters as iaa
 
@@ -374,9 +375,11 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     # Load over images
     submission = []
     APs = list()
+    pr_APs = list()
     APs_range = list()
     APs_75 = list()
     F1_scores = list()
+    pr_F1_scores = list()
     precisions_dict = {}
     recall_dict = {}
     num_of_confident_masks = 0
@@ -407,23 +410,44 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
 
         id_mask = 0
         N = len(r['scores'])
+        shape_m = r['masks'].shape
+        print(f'Masks shape {shape_m}')
+        processed_masks = np.zeros(shape_m)
+        element = np.array([[0, 1, 0],
+                            [1, 1, 1],
+                            [0, 1, 0]])
         for i in range(N):
             # Score
             score = r['scores'][i]
             # Mask
             mask = r['masks'][:, :, i]
             print(f'Mask shape {mask.shape}')
-            shape_m = r['masks'].shape
-            print(f'Masks shape {shape_m}')
-            processed_mask = np.empty(shape_m)
-
+            print(mask)
+            # pr_mask = processed_masks[:, :, i]
             # if score > 0.8:
             if score >= mask_score:
                 mask_img = mask * 255
                 # print(mask_img)
-                cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)), mask_img)
+                cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
+                            mask_img)
                 id_mask += 1
                 num_of_confident_masks += 1
+                pr_mask = closing(mask, element)
+                num_ones = (pr_mask == 1).sum()
+                if num_ones < 512*512/2:
+                    cv2.imwrite(
+                        '{}/{}/pr_masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
+                        pr_mask * 255)
+                    processed_masks[:, :, i] = pr_mask
+                else:
+                    print('Huge mask!!!!!!!!!')
+
+        visualize.display_instances(
+            image, r['rois'], processed_masks, r['class_ids'],
+            dataset.class_names, r['scores'],
+            show_bbox=False, show_mask=False,
+            title="Predictions")
+        plt.savefig("{}/{}/pr_predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
         print(f"count_statistics: {count_statistics}, type: {type(count_statistics)}")
         if count_statistics:
@@ -452,15 +476,26 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                     show_box=False, show_mask=False,
                     iou_threshold=0.5, score_threshold=0.5)
                 plt.savefig("{}/{}/difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
+
+                visualize.display_differences(
+                    image,
+                    gt_bbox, gt_class_id, gt_mask,
+                    r['rois'], r['class_ids'], r['scores'],processed_masks,
+                    dataset.class_names, ax=get_ax(),
+                    show_box=False, show_mask=False,
+                    iou_threshold=0.5, score_threshold=0.5)
+                plt.savefig("{}/{}/pr_difference.png".format(submit_dir, dataset.image_info[image_id]["id"]))
             except Exception as e:
                 print(f"Visualize display_differences failed on {str(e)}")
 
             # calculate statistics, including AP
             AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
+            pr_AP, pr_precisions, pr_recalls = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+                                                    processed_masks)
             AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
-            AP_75, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+            AP_75, _, _, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'], iou_threshold=0.75)
             print(f"AP: {AP}, TYPE AP: {type(AP)}")
             if np.isnan(AP):
@@ -468,9 +503,11 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 # print(f'AP_range is {AP_range} in image {image_id}')
             else:
                 print(f'AP is {AP} in image {image_id}')
+                print(f'processed AP is {pr_AP} in image {image_id}')
                 print(f'AP_range is {AP_range} in image {image_id}')
                 print(f'AP_75 is {AP_75} in image {image_id}')
                 APs.append(AP)
+                pr_APs.append(pr_AP)
                 APs_range.append(AP_range)
                 APs_75.append(AP_75)
 
@@ -479,23 +516,17 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 print(f'recall is {recalls} in image {image_id}')
             else:
                 f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
+                pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))
                 print(f"F1: {f1}, TYPE F1: {type(f1)}")
+                print(f"processed F1: {pr_f1}")
                 if np.isnan(f1):
                     print(f'F1 is {f1} in image {image_id}')
                 else:
                     F1_scores.append(f1)
+                    pr_F1_scores.append(pr_f1)
 
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)
-            # store
-            # if AP != 'nan':
-            #     APs.append(AP)
-            # f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
-            # if f1 != 'nan':
-            #     F1_scores.append(f1)
-            # print(f"AP: {AP}, TYPE AP: {type(AP)}")
-            # print(f"F1: {f1}, TYPE F1: {type(f1)}")
-
 
     if count_statistics:
         # calculate the mean AP and mean F1 across all tested images
@@ -503,6 +534,8 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         mAP_range = np.mean(APs_range)
         mAP_75 = np.mean(APs_75)
         mF1 = np.mean(F1_scores)
+        pr_mAP = np.mean(pr_APs)
+        pr_mF1 = np.mean(pr_F1_scores)
 
         # # Save mAP to txt file
         file_path = os.path.join(submit_dir, "statistics.txt")
@@ -511,6 +544,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             f.write(f'Mean F1: {str(mF1)} \t length of F1 array: {str(len(F1_scores))}\n')
             f.write(f'Mean AP_range: {str(mAP_range)} \t length of AP array: {str(len(APs_range))} \n')
             f.write(f'Mean AP_75: {str(mAP_75)} \t length of AP array: {str(len(APs_75))} \n')
+            f.write(f'------------------------------------------\n')
+            f.write(f'Mean processed AP_50: {str(pr_mAP)} \t length of AP array: {str(len(pr_APs))} \n')
+            f.write(f'Mean processed F1: {str(pr_mF1)} \t length of F1 array: {str(len(pr_F1_scores))}\n')
             f.write(f'------------------------------------------\n')
             f.write(f'APs 50: {str(APs)} \n')
             f.write(f'F1 scores: {str(F1_scores)} \n')

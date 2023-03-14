@@ -417,9 +417,12 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         shape_m = r['masks'].shape
         print(f'Masks shape {shape_m}')
         processed_masks = np.zeros(shape_m)
-        element = np.array([[0, 1, 0],
-                            [1, 1, 1],
-                            [0, 1, 0]])
+        element = np.array([[0, 0, 1, 1, 0, 0],
+                            [0, 0, 1, 1, 0, 0],
+                            [1, 1, 1, 1, 1, 1],
+                            [1, 1, 1, 1, 1, 1],
+                            [0, 0, 1, 1, 0, 0],
+                            [0, 0, 1, 1, 0, 0]])
         for i in range(N):
             # Score
             score = r['scores'][i]

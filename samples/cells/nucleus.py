@@ -41,7 +41,8 @@ import json
 import datetime
 import numpy as np
 import skimage.io
-from skimage.morphology import closing
+from skimage.morphology import closing, remove_small_holes
+# from skimage.ndimage import
 import cv2
 from imgaug import augmenters as iaa
 
@@ -417,18 +418,11 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         shape_m = r['masks'].shape
         print(f'Masks shape {shape_m}')
         processed_masks = np.zeros(shape_m)
-        # element = np.array([[0, 0, 1, 1, 0, 0],
-        #                     [0, 0, 1, 1, 0, 0],
-        #                     [1, 1, 1, 1, 1, 1],
-        #                     [1, 1, 1, 1, 1, 1],
-        #                     [0, 0, 1, 1, 0, 0],
-        #                     [0, 0, 1, 1, 0, 0]])
-        element = np.array([[1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1]])
+        element = np.array([[0, 1, 0],
+                            [1, 1, 1],
+                            [0, 1, 0]])
+        idxs_to_delete = []
+
         for i in range(N):
             # Score
             score = r['scores'][i]
@@ -439,14 +433,13 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # if score > 0.8:
             if score >= mask_score:
                 mask_img = mask * 255
-                # print(mask_img)
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
                             mask_img)
-                id_mask += 1
-                num_of_confident_masks += 1
+
+                # POSTPROCESSING
                 pr_mask = closing(mask, element)
+                pr_mask = remove_small_holes(pr_mask, 400)
                 print(f'Mask shape {pr_mask.shape}')
-                # print(pr_mask)
                 num_ones = (pr_mask == 1).sum()
                 print(f'Number of ones in processed mask: {num_ones}')
                 if num_ones < 512*512/2:
@@ -455,11 +448,24 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                         pr_mask * 255)
                     processed_masks[:, :, i] = pr_mask
                 else:
-                    print('Huge mask!!!!!!!!!')
+                    idxs_to_delete.append(i)
+
+                id_mask += 1
+                num_of_confident_masks += 1
+
+        pr_rois = r['rois']
+        pr_class_ids = r['class_ids']
+        pr_scores = r['scores']
+        for index in sorted(idxs_to_delete, reverse=True):
+            del pr_rois[index]
+            del pr_class_ids[index]
+            del pr_scores[index]
+            del processed_masks[:,:,index]
+
 
         visualize.display_instances(
-            image, r['rois'], processed_masks, r['class_ids'],
-            dataset.class_names, r['scores'],
+            image, pr_rois, processed_masks, pr_class_ids,
+            dataset.class_names, pr_scores,
             show_bbox=False, show_mask=False,
             title="Predictions")
         plt.savefig("{}/{}/pr_predictions.png".format(submit_dir, dataset.image_info[image_id]["id"]))

@@ -458,10 +458,15 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         pr_scores = r['scores']
         print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
         for index in sorted(idxs_to_delete, reverse=True):
-            del pr_rois[index]
-            del pr_class_ids[index]
-            del pr_scores[index]
-            del processed_masks[:,:,index]
+            try:
+                del pr_rois[index]
+                del pr_class_ids[index]
+                del pr_scores[index]
+                del processed_masks[:,:,index]
+            except e as Exception:
+                print(f'Exeption: {str(e)}')
+                print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
+                print(pr_rois)
 
 
         visualize.display_instances(

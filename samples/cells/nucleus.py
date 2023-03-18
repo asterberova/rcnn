@@ -458,17 +458,21 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         pr_scores = r['scores']
         print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
         for index in sorted(idxs_to_delete, reverse=True):
-            try:
-                del pr_rois[:,index]
-                del pr_class_ids[index]
-                del pr_scores[index]
-                del processed_masks[:,:,index]
-            except Exception as e:
-                print(f'Exeption: {str(e)}')
-                print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
-                print(f'rois {pr_rois}')
-                print(f'calss ids {pr_class_ids}')
-                print(f'scores {pr_scores}')
+            del pr_rois[:,index]
+            del pr_class_ids[index]
+            del pr_scores[index]
+            del processed_masks[:,:,index]
+            # try:
+            #     del pr_rois[:,index]
+            #     del pr_class_ids[index]
+            #     del pr_scores[index]
+            #     del processed_masks[:,:,index]
+            # except Exception as e:
+            #     print(f'Exeption: {str(e)}')
+            #     print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
+            #     print(f'rois {pr_rois}')
+            #     print(f'calss ids {pr_class_ids}')
+            #     print(f'scores {pr_scores}')
 
 
         visualize.display_instances(
@@ -578,11 +582,13 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             f.write(f'Mean processed F1: {str(pr_mF1)} \t length of F1 array: {str(len(pr_F1_scores))}\n')
             f.write(f'------------------------------------------\n')
             f.write(f'APs 50: {str(APs)} \n')
+            f.write(f'Processed APs 50: {str(pr_APs)} \n')
+            f.write(f'------------------------------------------\n')
             f.write(f'F1 scores: {str(F1_scores)} \n')
+            f.write(f'Processed F1 scores: {str(pr_F1_scores)} \n')
+            f.write(f'------------------------------------------\n')
             f.write(f'APs range: {str(APs_range)} \n')
             f.write(f'APs 75: {str(APs_75)} \n')
-            f.write(f'------------------------------------------\n')
-            f.write(f'Processed APs 50: {str(pr_APs)} \n')
 
 
         # Save precision and recall

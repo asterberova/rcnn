@@ -456,6 +456,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         pr_rois = r['rois']
         pr_class_ids = r['class_ids']
         pr_scores = r['scores']
+        print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
         for index in sorted(idxs_to_delete, reverse=True):
             del pr_rois[index]
             del pr_class_ids[index]

@@ -460,8 +460,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         for index in sorted(idxs_to_delete, reverse=True):
             # del pr_rois[:,index]
             pr_rois = np.delete(pr_rois, (index), axis=0)
-            del pr_class_ids[index]
-            del pr_scores[index]
+            pr_class_ids = np.delete(pr_class_ids, index, axis=0)
+            pr_scores = np.delete(pr_scores, index, axis=0)
+            # del pr_scores[index]
             # del processed_masks[:,:,index]
             print(f'Masks shape {processed_masks.shape}')
             processed_masks = np.delete(processed_masks, index, axis=0)

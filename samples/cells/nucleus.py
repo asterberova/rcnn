@@ -467,7 +467,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # del pr_scores[index]
             # del processed_masks[:,:,index]
             print(f'Masks shape {processed_masks.shape}')
-            processed_masks = np.delete(processed_masks, index, axis=1)
+            processed_masks = np.delete(processed_masks, index, axis=2)
             print(f'Masks shape after delete {processed_masks.shape}')
 
             # try:

@@ -422,7 +422,6 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                             [1, 1, 1],
                             [0, 1, 0]])
         idxs_to_delete = []
-
         for i in range(N):
             # Score
             score = r['scores'][i]
@@ -467,19 +466,6 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             processed_masks = np.delete(processed_masks, index, axis=2)
             print(f'Masks shape after delete {processed_masks.shape}')
 
-            # try:
-            #     del pr_rois[:,index]
-            #     del pr_class_ids[index]
-            #     del pr_scores[index]
-            #     del processed_masks[:,:,index]
-            # except Exception as e:
-            #     print(f'Exeption: {str(e)}')
-            #     print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
-            #     print(f'rois {pr_rois}')
-            #     print(f'calss ids {pr_class_ids}')
-            #     print(f'scores {pr_scores}')
-
-
         visualize.display_instances(
             image, pr_rois, processed_masks, pr_class_ids,
             dataset.class_names, pr_scores,
@@ -498,13 +484,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # Run object detection
             # results = model.detect_molded(np.expand_dims(image, 0), np.expand_dims(image_meta, 0), verbose=1)
             # Display results
-            # r = results[0]
             # New prediction https://github.com/matterport/Mask_RCNN/issues/2165
-            # scaled_image = modellib.mold_image(image, config)
-            # sample = np.expand_dims(scaled_image, 0)
-            # yhat = model.detect(sample, verbose=0)
-            # r = yhat[0]
-
             try:
                 visualize.display_differences(
                     image,
@@ -518,7 +498,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 visualize.display_differences(
                     image,
                     gt_bbox, gt_class_id, gt_mask,
-                    r['rois'], r['class_ids'], r['scores'],processed_masks,
+                    pr_rois,pr_class_ids, pr_scores, processed_masks,
                     dataset.class_names, ax=get_ax(),
                     show_box=False, show_mask=False,
                     iou_threshold=0.5, score_threshold=0.5)
@@ -529,7 +509,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             # calculate statistics, including AP
             AP, precisions, recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])
-            pr_AP, pr_precisions, pr_recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
+            pr_AP, pr_precisions, pr_recalls, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask, pr_rois, pr_class_ids, pr_scores,
                                                     processed_masks)
             AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"],
                                                     r['masks'])

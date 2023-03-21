@@ -373,7 +373,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     dataset = CellsDataset()
     dataset.load_cells(dataset_dir, subset)
     dataset.prepare()
-    # Load over images
+    # Load over images and count statistics
     submission = []
     APs = list()
     pr_APs = list()
@@ -384,6 +384,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
     precisions_dict = {}
     recall_dict = {}
     num_of_confident_masks = 0
+    num_of_confident_pr_masks = 0
+    total_masks = 0
+    total_pr_masks = 0
     for image_id in dataset.image_ids:
         print(f"Detection on image: {image_id}")
         print(f'Image: {dataset.image_info[image_id]["id"]}')
@@ -427,30 +430,32 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             score = r['scores'][i]
             # Mask
             mask = r['masks'][:, :, i]
-            # if score > 0.8:
+            total_masks += 1
+            mask_img = mask * 255
             if score >= mask_score:
-                mask_img = mask * 255
                 cv2.imwrite('{}/{}/masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
-                            mask_img)
-
-                # POSTPROCESSING
-                pr_mask = closing(mask, element)
-                pr_mask = remove_small_holes(pr_mask, 400)
-                # print(f'Mask shape {pr_mask.shape}')
-                num_ones = (pr_mask == 1).sum()
-                # print(f'Number of ones in processed mask: {num_ones}')
-                if num_ones < 512*512/2:
-                    cv2.imwrite(
-                        '{}/{}/pr_masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
-                        pr_mask * 255)
-                    processed_masks[:, :, i] = pr_mask
-                else:
-                    idxs_to_delete.append(i)
-                id_mask += 1
+                        mask_img)
                 num_of_confident_masks += 1
-            else: # score < mask_score
-                if i not in idxs_to_delete:
-                    idxs_to_delete.append(i)
+
+            # POSTPROCESSING
+            pr_mask = closing(mask, element)
+            pr_mask = remove_small_holes(pr_mask, 400)
+            # print(f'Mask shape {pr_mask.shape}')
+            num_ones = (pr_mask == 1).sum()
+            # print(f'Number of ones in processed mask: {num_ones}')
+            if num_ones < 512*512/2:
+                if score >= mask_score:
+                    cv2.imwrite('{}/{}/pr_masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
+                        pr_mask * 255)
+                    num_of_confident_pr_masks += 1
+
+                processed_masks[:, :, i] = pr_mask
+            else:
+                idxs_to_delete.append(i)
+            id_mask += 1
+            # else: # score < mask_score
+            #     if i not in idxs_to_delete:
+            #         idxs_to_delete.append(i)
 
         pr_rois = r['rois']
         pr_class_ids = r['class_ids']
@@ -461,6 +466,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             pr_class_ids = np.delete(pr_class_ids, index, axis=0)
             pr_scores = np.delete(pr_scores, index, axis=0)
             processed_masks = np.delete(processed_masks, index, axis=2)
+        total_pr_masks += len(pr_scores)
 
         visualize.display_instances(
             image, pr_rois, processed_masks, pr_class_ids,
@@ -570,7 +576,11 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             f.write(f'------------------------------------------\n')
             f.write(f'APs range: {str(APs_range)} \n')
             f.write(f'APs 75: {str(APs_75)} \n')
-
+            f.write(f'------------------------------------------\n')
+            f.write(f"Predicted in total {num_of_confident_masks} masks with score > {mask_score}\n")
+            f.write(f"Predicted in total {num_of_confident_pr_masks} processed masks with score > {mask_score}\n")
+            f.write(f"Predicted in total {total_masks} masks \n")
+            f.write(f"Predicted in total {total_pr_masks} processed masks \n")
 
         # Save precision and recall
         file_path = os.path.join(submit_dir, "precision.txt")
@@ -587,6 +597,8 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
         f.write(submission)
     print("Saved to ", submit_dir)
     print(f"Predicted in total {num_of_confident_masks} masks with score > {mask_score}")
+    print(f"Predicted in total {num_of_confident_pr_masks} processed masks with score > {mask_score}")
+
 
 
 ############################################################

@@ -454,8 +454,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 idxs_to_delete.append(i)
             id_mask += 1
             # else: # score < mask_score
-            #     if i not in idxs_to_delete:
-            #         idxs_to_delete.append(i)
+            if score < 0.55:
+                if i not in idxs_to_delete:
+                    idxs_to_delete.append(i)
 
         pr_rois = r['rois']
         pr_class_ids = r['class_ids']

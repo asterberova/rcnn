@@ -520,14 +520,13 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             print(f"AP: {AP}, TYPE AP: {type(AP)}")
             if np.isnan(AP):
                 print(f'AP is {AP} in image {image_id}')
-                # print(f'AP_range is {AP_range} in image {image_id}')
             else:
                 print(f'AP is {AP} in image {image_id}')
                 print(f'processed AP is {pr_AP} in image {image_id}')
                 print(f'AP_range is {AP_range} in image {image_id}')
                 print(f'AP_75 is {AP_75} in image {image_id}')
                 APs.append(AP)
-                pr_APs.append(pr_AP)
+                # pr_APs.append(pr_AP)
                 APs_range.append(AP_range)
                 APs_75.append(AP_75)
 
@@ -536,14 +535,22 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 print(f'recall is {recalls} in image {image_id}')
             else:
                 f1 = (2 * (np.mean(precisions) * np.mean(recalls))) / (np.mean(precisions) + np.mean(recalls))
-                pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))
+                # pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))
                 print(f"F1: {f1}, TYPE F1: {type(f1)}")
-                print(f"processed F1: {pr_f1}")
+                # print(f"processed F1: {pr_f1}")
                 if np.isnan(f1):
                     print(f'F1 is {f1} in image {image_id}')
                 else:
                     F1_scores.append(f1)
-                    pr_F1_scores.append(pr_f1)
+                    # pr_F1_scores.append(pr_f1)
+
+            if pr_AP == 0:
+                if len(pr_scores) > 0:
+                    pr_APs.append(pr_AP)
+                    pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))
+                    print(f"processed F1: {pr_f1}")
+                else:
+                    print('!!!!!!!!! EMPTY MASKS AND ZERO !!!!!!!!!!!!!!!!!!!!!!!!!')
 
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)

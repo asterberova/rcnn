@@ -415,8 +415,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
 
         id_mask = 0
         N = len(r['scores'])
-        shape_m = r['masks'].shape
-        print(f'Masks shape {shape_m}')
+        # shape_m = r['masks'].shape
         # processed_masks = np.zeros(shape_m)
         processed_masks = r['masks']
         element = np.array([[0, 1, 0],
@@ -428,7 +427,6 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
             score = r['scores'][i]
             # Mask
             mask = r['masks'][:, :, i]
-            print(f'Mask shape {mask.shape}')
             # if score > 0.8:
             if score >= mask_score:
                 mask_img = mask * 255
@@ -438,9 +436,9 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                 # POSTPROCESSING
                 pr_mask = closing(mask, element)
                 pr_mask = remove_small_holes(pr_mask, 400)
-                print(f'Mask shape {pr_mask.shape}')
+                # print(f'Mask shape {pr_mask.shape}')
                 num_ones = (pr_mask == 1).sum()
-                print(f'Number of ones in processed mask: {num_ones}')
+                # print(f'Number of ones in processed mask: {num_ones}')
                 if num_ones < 512*512/2:
                     cv2.imwrite(
                         '{}/{}/pr_masks/{}.png'.format(submit_dir, dataset.image_info[image_id]["id"], str(id_mask)),
@@ -448,23 +446,21 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                     processed_masks[:, :, i] = pr_mask
                 else:
                     idxs_to_delete.append(i)
-
                 id_mask += 1
                 num_of_confident_masks += 1
+            else: # score < mask_score
+                if i not in idxs_to_delete:
+                    idxs_to_delete.append(i)
 
         pr_rois = r['rois']
         pr_class_ids = r['class_ids']
         pr_scores = r['scores']
         print(f'Indexes to delete: {sorted(idxs_to_delete, reverse=True)}')
         for index in sorted(idxs_to_delete, reverse=True):
-            print(pr_rois)
             pr_rois = np.delete(pr_rois, index, axis=0)
-            print(pr_rois)
             pr_class_ids = np.delete(pr_class_ids, index, axis=0)
             pr_scores = np.delete(pr_scores, index, axis=0)
-            print(f'Masks shape {processed_masks.shape}')
             processed_masks = np.delete(processed_masks, index, axis=2)
-            print(f'Masks shape after delete {processed_masks.shape}')
 
         visualize.display_instances(
             image, pr_rois, processed_masks, pr_class_ids,

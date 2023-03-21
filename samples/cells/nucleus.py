@@ -545,6 +545,7 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                     # pr_F1_scores.append(pr_f1)
 
             if pr_AP == 0:
+                print(f'Len pr_scores: {str(len(pr_scores))}')
                 if len(pr_scores) > 0:
                     pr_APs.append(pr_AP)
                     pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))

@@ -550,8 +550,15 @@ def detect(model, dataset_dir, subset, mask_score, count_statistics):
                     pr_APs.append(pr_AP)
                     pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (np.mean(pr_precisions) + np.mean(pr_recalls))
                     print(f"processed F1: {pr_f1}")
+                    pr_F1_scores.append(pr_f1)
                 else:
                     print('!!!!!!!!! EMPTY MASKS AND ZERO !!!!!!!!!!!!!!!!!!!!!!!!!')
+            else:
+                pr_APs.append(pr_AP)
+                pr_f1 = (2 * (np.mean(pr_precisions) * np.mean(pr_recalls))) / (
+                            np.mean(pr_precisions) + np.mean(pr_recalls))
+                print(f"processed F1: {pr_f1}")
+                pr_F1_scores.append(pr_f1)
 
             precisions_dict[image_id] = np.mean(precisions)
             recall_dict[image_id] = np.mean(recalls)
